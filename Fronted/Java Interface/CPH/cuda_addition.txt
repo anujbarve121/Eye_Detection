@@ -1,0 +1,32 @@
+Problem Statement: Addition of two large vectors
+
+Code:
+Command to install nvidia gpu on google colab: !nvidia-smi
+import cupy as cp
+import numpy as np
+import time
+# Size of large vectors
+N = 10000000
+# Create large vectors on CPU
+a_cpu = np.random.rand(N).astype(np.float32)
+b_cpu = np.random.rand(N).astype(np.float32)
+# ---------- CPU ----------
+start_cpu = time.time()
+c_cpu = a_cpu + b_cpu
+end_cpu = time.time()
+print(f"CPU Vector Addition Time: {end_cpu - start_cpu:.4f} seconds")
+# ---------- GPU ----------
+a_gpu = cp.asarray(a_cpu)
+b_gpu = cp.asarray(b_cpu)
+start_gpu = time.time()
+c_gpu = a_gpu + b_gpu
+cp.cuda.Device(0).synchronize()  # Ensure GPU is done
+end_gpu = time.time()
+print(f"GPU Vector Addition Time: {end_gpu - start_gpu:.4f} seconds")
+
+Command to run the shells in google colab:
+Shift enter
+
+Output:
+CPU Vector Addition Time: 0.0169 seconds
+GPU Vector Addition Time: 0.0039 seconds
