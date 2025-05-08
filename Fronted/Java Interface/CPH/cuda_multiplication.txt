@@ -1,0 +1,36 @@
+Problem Statement: Matrix Multiplication using CUDA C
+
+Code:
+Command to install nvidia gpu on google colab:  !nvidia-smi
+import numpy as np
+import cupy as cp
+import time
+
+# Size of matrices
+N = 1024
+
+# Create random matrices on CPU
+A_cpu = np.random.rand(N, N).astype(np.float32)
+B_cpu = np.random.rand(N, N).astype(np.float32)
+
+# ---------- CPU ----------
+start_cpu = time.time()
+C_cpu = np.matmul(A_cpu, B_cpu)
+end_cpu = time.time()
+print(f"CPU Matrix Multiplication Time: {end_cpu - start_cpu:.4f} seconds")
+
+# ---------- GPU ----------
+A_gpu = cp.asarray(A_cpu)
+B_gpu = cp.asarray(B_cpu)
+start_gpu = time.time()
+C_gpu = cp.matmul(A_gpu, B_gpu)
+cp.cuda.Device(0).synchronize()
+end_gpu = time.time()
+print(f"GPU Matrix Multiplication Time: {end_gpu - start_gpu:.4f} seconds")
+
+Command to run the shells in google colab:
+Shift enter
+
+Output:
+CPU Matrix Multiplication Time: 0.0516 seconds
+GPU Matrix Multiplication Time: 0.6664 seconds
