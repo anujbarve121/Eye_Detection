@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <omp.h>
+
+int main() {
+    int n;
+    std::cout << "Enter the number of elements: ";
+    std::cin >> n;
+
+    if (n <= 0) {
+        std::cerr << "Error: Number of elements must be greater than 0." << std::endl;
+        return 1;
+    }
+
+    std::vector<int> data(n);
+    std::cout << "Enter " << n << " integer values:" << std::endl;
+    for (int i = 0; i < n; ++i) {
+        std::cin >> data[i];
+    }
+
+    int min_val = std::numeric_limits<int>::max();
+    int max_val = std::numeric_limits<int>::min();
+    long long sum_val = 0;
+
+    // Perform parallel reduction
+    #pragma omp parallel for reduction(min:min_val) reduction(max:max_val) reduction(+:sum_val)
+    for (int i = 0; i < n; ++i) {
+        min_val = std::min(min_val, data[i]);
+        max_val = std::max(max_val, data[i]);
+        sum_val += data[i];
+    }
+
+    double average = static_cast<double>(sum_val) / n;
+
+    // Output the results
+    std::cout << "\nResults :" << std::endl;
+    std::cout << "Minimum: " << min_val << std::endl;
+    std::cout << "Maximum: " << max_val << std::endl;
+    std::cout << "Sum: " << sum_val << std::endl;
+    std::cout << "Average: " << average << std::endl;
+
+    return 0;
+}
+
+Theory :
+The code begins with a set of preprocessor directives that include standard C++ libraries. #include <iostream> includes the iostream library, which provides input and output functionalities, allowing the program to interact with the user through the console (e.g., printing messages and reading input). #include <vector> includes the vector library, which enables the use of dynamic arrays (std::vector), a flexible container to store the integer elements. #include <limits> includes the limits library, which provides access to the limits of fundamental data types, such as the maximum and minimum values for integers. #include <omp.h> includes the OpenMP header file, which provides support for parallel programming using compiler directives.
+
+The int main() { line marks the beginning of the main function, the entry point of the C++ program. Inside the main function, int n; declares an integer variable n to store the number of elements the user will enter. std::cout << "Enter the number of elements: "; prints a message to the console, prompting the user to enter the desired number of elements. std::cin >> n; reads the integer value entered by the user from the standard input (keyboard) and stores it in the variable n.
+
+The code then includes an error check. if (n <= 0) { checks if the entered number of elements n is less than or equal to zero. If this condition is true, it means the user has entered an invalid input. std::cerr << "Error: Number of elements must be greater than 0." << std::endl; prints an error message to the standard error stream (std::cerr), indicating that the number of elements must be positive. return 1; terminates the program and returns an error code of 1 to the operating system, signaling that the program did not execute successfully.
+
+If the number of elements is valid, the program proceeds to create a vector to store the data. std::vector<int> data(n); declares a vector of integers named data and initializes it to have a size of n elements. std::cout << "Enter " << n << " integer values:" << std::endl; prompts the user to enter n integer values. The for (int i = 0; i < n; ++i) { loop iterates n times, from i = 0 to i = n-1. Inside the loop, std::cin >> data[i]; reads each integer value entered by the user and stores it in the i-th element of the data vector.
+
+Next, the code initializes variables to store the minimum, maximum, and sum of the elements. int min_val = std::numeric_limits<int>::max(); declares an integer variable min_val and initializes it to the maximum possible value for an integer, obtained using std::numeric_limits<int>::max(). This ensures that the first element encountered will always be smaller than the initial value of min_val. int max_val = std::numeric_limits<int>::min(); declares an integer variable max_val and initializes it to the minimum possible value for an integer, obtained using std::numeric_limits<int>::min(). This ensures that the first element encountered will always be larger than the initial value of max_val. long long sum_val = 0; declares a long long integer variable sum_val and initializes it to 0. A long long is used to potentially avoid integer overflow if the sum of the elements is large.
+
+The core of the parallel computation is in the following block. #pragma omp parallel for reduction(min:min_val) reduction(max:max_val) reduction(+:sum_val) is an OpenMP directive that instructs the compiler to parallelize the subsequent for loop across multiple threads. The reduction(min:min_val) clause specifies that the min_val variable will be updated in parallel, with each thread calculating a local minimum, and then the overall minimum across all threads will be computed. Similarly, reduction(max:max_val) performs a parallel reduction to find the overall maximum value, and reduction(+:sum_val) performs a parallel reduction to calculate the sum of the elements. The for (int i = 0; i < n; ++i) { loop iterates through all the elements of the data vector in parallel. Inside the loop, min_val = std::min(min_val, data[i]); updates min_val with the smaller value between the current min_val and the current element data[i]. max_val = std::max(max_val, data[i]); updates max_val with the larger value between the current max_val and data[i]. sum_val += data[i]; adds the current element data[i] to the sum_val.
+
+After the parallel loop completes, the code calculates the average. double average = static_cast<double>(sum_val) / n; calculates the average by dividing the sum_val (which is a long long) by the number of elements n. The static_cast<double>(sum_val) is used to explicitly convert sum_val to a double-precision floating-point number before the division, ensuring that the result is a floating-point number and not an integer due to integer division.
+
+Finally, the code outputs the results to the console. std::cout << "\nResults :" << std::endl; prints a heading "Results :". std::cout << "Minimum: " << min_val << std::endl; prints the calculated minimum value. std::cout << "Maximum: " << max_val << std::endl; prints the calculated maximum value. std::cout << "Sum: " << sum_val << std::endl; prints the calculated sum of the elements. std::cout << "Average: " << average << std::endl; prints the calculated average. return 0; indicates that the program executed successfully. } closes the main function.
